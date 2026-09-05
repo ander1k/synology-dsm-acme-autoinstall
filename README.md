@@ -1,175 +1,210 @@
-# 🔐 Synology Manual ACME
+<div align="center">
 
-Автоматизированное получение и продление wildcard-сертификатов Let's Encrypt для Synology DSM **без DNS API**.
+# 🔐 SynoCert Flow
 
-Ручным остаётся только один шаг: заменить TXT-записи `_acme-challenge`. Всё остальное контейнер делает сам.
+### Automated Let's Encrypt certificate management for Synology DSM
 
-> Версия: **v1.3.1**
+**DNS API • Manual DNS fallback • DSM deploy • Telegram control • Multi-domain**
+
+![Version](https://img.shields.io/badge/version-1.5.0-111827?style=for-the-badge)
+![Shell](https://img.shields.io/badge/POSIX-Shell-111827?style=for-the-badge&logo=gnu-bash&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-111827?style=for-the-badge&logo=docker&logoColor=white)
+![ACME](https://img.shields.io/badge/acme.sh-Let's_Encrypt-111827?style=for-the-badge&logo=letsencrypt&logoColor=white)
+![Synology](https://img.shields.io/badge/Synology-DSM-111827?style=for-the-badge)
+![Telegram](https://img.shields.io/badge/Telegram-Control-111827?style=for-the-badge&logo=telegram&logoColor=white)
+
+</div>
+
+---
+
+**SynoCert Flow** — лёгкий Docker-проект для автоматического выпуска, продления и установки wildcard-сертификатов Let's Encrypt в **Synology DSM**.
+
+Проект написан на **POSIX Shell**, работает поверх официального образа **acme.sh**, запускается через **Docker Compose** и не требует собственной базы данных или отдельного backend.
 
 ## ✨ Возможности
 
-- wildcard `example.com` + `*.example.com`;
-- несколько доменов;
-- отдельный DSM-пользователь для каждого домена;
-- несколько ACME-аккаунтов через `ACME_ACCOUNT`;
-- автоматическая проверка DNS;
-- дополнительная DNS-стабилизация;
-- автоматический deploy сертификата в DSM;
-- повтор только deploy, если сертификат уже получен;
-- Telegram-уведомления и команды;
-- безопасное обновление без удаления данных.
+- 🔄 автоматическое продление сертификатов через DNS API;
+- 🌐 поддержка **REG.RU** и **Spaceship**;
+- 📝 manual DNS-01 workflow, если API не используется;
+- 🛟 автоматический API → manual fallback;
+- 🔐 deploy готового сертификата прямо в Synology DSM;
+- 🧩 несколько доменов, DSM-пользователей и ACME accounts;
+- 🧪 production / Let's Encrypt staging;
+- 🧠 renewal scheduling с учётом `Le_NextRenewTime` / ARI;
+- 🤖 Telegram-команды, уведомления и диагностика;
+- ❤️ Docker healthchecks, логи и backups;
+- 🛡 защита от случайных повторных `--force` выпусков.
 
-## 🚀 Установка
-
-Распакуйте проект, например в:
-
-```text
-/volume1/docker/synology-acme-manual
-```
-
-Скопируйте:
+## 🧱 Как это работает
 
 ```text
-config/domain.example.env
+SynoCert Flow
+    │
+    ├── acme.sh
+    │     └── Let's Encrypt
+    │
+    ├── DNS
+    │     ├── REG.RU API
+    │     ├── Spaceship API
+    │     └── Manual TXT
+    │
+    ├── Synology DSM
+    │     └── automatic certificate deploy
+    │
+    └── Telegram
+          ├── status
+          ├── test
+          ├── renew
+          └── notifications
 ```
 
-в:
+## 🚀 Быстрый старт
 
-```text
-config/domains.d/01-example.env
+```bash
+cp .env.example .env
+cp config/domain.example.env config/domains.d/example.com.env
+docker compose up -d
 ```
 
-Заполните:
+Минимальный конфиг домена:
 
 ```env
+CONFIG_VERSION='4'
+
 DOMAIN='example.com'
 ACME_ACCOUNT='default'
+ACME_ENV='production'
+
+DNS_PROVIDER=''
 
 SYNO_CERTIFICATE='Wildcard example.com'
 SYNO_USERNAME='acme-example'
 SYNO_PASSWORD='CHANGE_ME'
-
 SYNO_HOSTNAME='192.168.1.100'
-SYNO_SCHEME='auto'
-SYNO_PORT='auto'
 
-SYNO_CREATE=''
 ENABLED='1'
 ```
 
-Для существующего сертификата оставьте:
+### DNS API
+
+Для REG.RU:
 
 ```env
-SYNO_CREATE=''
+DNS_PROVIDER='regru-main'
 ```
 
-Создайте проект через:
-
-```text
-Container Manager → Проект → Создать
-```
-
-и используйте `compose.yaml`.
-
-## 🌐 Продление сертификата
-
-Когда сертификат пора обновлять, контейнер покажет:
-
-```text
-TXT _acme-challenge.example.com = TOKEN_1
-TXT _acme-challenge.example.com = TOKEN_2
-```
-
-Если значений два — оба должны существовать одновременно.
-
-После изменения DNS перезапустите `acme-synology`.
-
-Дальше контейнер сам:
-
-```text
-проверит DNS
-→ подождёт стабилизацию
-→ получит сертификат
-→ установит его в DSM
-```
-
-## 📲 Telegram
-
-В `.env`:
+Профиль `config/dns-providers.d/regru-main.env`:
 
 ```env
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
-TELEGRAM_COMMANDS=1
+DNS_API='dns_regru'
+
+REGRU_API_Username='LOGIN'
+REGRU_API_Password='PASSWORD'
 ```
 
-Команды:
+Для Spaceship используется тот же принцип с `dns_spaceship`.
+
+> Реальные `.env`, DNS API credentials, ACME data и private keys не должны попадать в Git.
+
+## 🤖 Telegram
+
+После настройки `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID`:
 
 ```text
-/ping
-/version
+/help
 /status
 /domains
 /cert <domain>
-/dns <domain>
-/deploy <domain>
-/check
+/test <domain>
+/health
 /renew <domain>
-/help
+/renew-force <domain>
+/deploy <domain>
+/debug <domain>
 ```
 
-## 🗂 Несколько ACME-аккаунтов
-
-В каждом домене можно указать:
-
-```env
-ACME_ACCOUNT='account-a'
-```
-
-Данные будут храниться отдельно:
+`/test <domain>` выполняет безопасный preflight без изменения DNS и без выпуска сертификата:
 
 ```text
-data/accounts/account-a/
-data/accounts/account-b/
+DSM API
+DNS profile
+DNS credentials
+Registrar authentication
+Domain / DNS zone access
+Let's Encrypt CA
+ACME account
+Renewal readiness
 ```
 
-## 🔄 Обновление
-
-Новую версию распакуйте рядом и выполните:
-
-```sh
-sh /path/to/new-version/upgrade.sh   /path/to/new-version   /volume1/docker/synology-acme-manual
-```
-
-Не удаляются:
+Успешный итог:
 
 ```text
+Automatic renewal: ✅ READY
+```
+
+## 🛡 Безопасное продление
+
+Обычный цикл **не создаёт новый ACME order**, пока сертификат не вошёл в окно продления.
+
+Если `acme.sh` или ARI сообщает, что renewal ещё не требуется:
+
+```text
+SKIPPED / NOT DUE
+```
+
+это считается нормальным состоянием — без ошибки и без manual fallback.
+
+Принудительный выпуск доступен только через:
+
+```text
+/renew-force <domain>
+```
+
+## 🔄 Обновление с v1.4.x
+
+```bash
+sh /volume1/docker/synocert-flow-v1.5.0/upgrade.sh \
+  /volume1/docker/synocert-flow-v1.5.0 \
+  /volume1/docker/synology-acme-manual
+```
+
+После обновления пересоздайте Project в Synology Container Manager.
+
+Сохраняются:
+
+```text
+.env
 data/
 state/
 logs/
 backups/
-config/domains.d/*.env
-.env
+config/domains.d/
+config/dns-providers.d/
 ```
 
-## ⚠️ Важно
-
-Manual DNS-01 требует новый TXT challenge при каждом новом выпуске или продлении сертификата.
-
-То есть полностью автоматическое продление без DNS API невозможно.
-
-## 🛡 Безопасность
-
-Не публикуйте:
+## 📁 Структура
 
 ```text
-.env
-config/domains.d/*.env
-data/
+app/                      workers и healthcheck
+config/domains.d/         конфиги доменов
+config/dns-providers.d/   DNS API profiles
+data/                     ACME accounts, keys, certificates
+state/                    runtime state
+logs/                     журналы
+backups/                  резервные копии сертификатов
+compose.yaml              Docker Compose
 ```
 
-Они могут содержать Telegram token, DSM-пароли, ACME account и private keys.
+## ⚙️ Stack
+
+**POSIX Shell · Docker Compose · acme.sh · Let's Encrypt · Synology DSM API · Telegram Bot API**
 
 ---
 
-Если проект вам полезен — можете добавить ⭐ на GitHub.
+<div align="center">
+
+### SynoCert Flow
+
+**Set it once. Let certificates renew themselves.**
+
+</div>
