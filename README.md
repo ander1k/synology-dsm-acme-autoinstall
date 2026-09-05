@@ -26,16 +26,17 @@
 
 ## ✨ Возможности
 
-- автоматическое продление через DNS API;
-- REG.RU и Spaceship из коробки;
-- manual DNS-01 fallback;
-- несколько доменов и ACME accounts;
-- автоматический deploy в DSM;
-- Let's Encrypt production / staging;
-- ARI / `Le_NextRenewTime` aware renewal;
-- Telegram-команды и уведомления;
-- безопасный `/test <domain>`;
-- healthcheck, logs и backups.
+- 🔄 **Автопродление** — автоматический renewal через DNS API;
+- 🌍 **DNS API** — REG.RU и Spaceship из коробки;
+- 📝 **Manual DNS-01** — ручной TXT workflow, если API не используется;
+- 🛟 **Fallback** — автоматический переход API → manual при реальной ошибке;
+- 🔐 **DSM Deploy** — установка готового сертификата прямо в Synology DSM;
+- 🧩 **Multi-domain** — несколько доменов, DSM-пользователей и ACME accounts;
+- 🧪 **Production / Staging** — безопасное тестирование через Let's Encrypt staging;
+- 🧠 **ARI-aware renewal** — учёт `Le_NextRenewTime` и рекомендованного окна продления;
+- 🤖 **Telegram Control** — команды, уведомления, диагностика и статусы;
+- ❤️ **Health & Logs** — healthcheck, журналы и резервные копии;
+- 🛡 **Rate-limit safety** — защита от случайных повторных `--force` выпусков.
 
 ## 🚀 Установка в Synology Container Manager
 
@@ -188,17 +189,6 @@ Automatic renewal: ✅ READY
 /renew-force <domain>
 ```
 
-## 🔄 Обновление с v1.4.x
-
-```bash
-sh /volume1/docker/synocert-flow-v1.5.0/upgrade.sh \
-  /volume1/docker/synocert-flow-v1.5.0 \
-  /volume1/docker/synology-acme-manual
-```
-
-После обновления пересоздайте Project в Container Manager.
-
-Сохраняются `.env`, сертификаты, ACME accounts, domain configs, DNS profiles, state, logs и backups.
 
 ---
 
