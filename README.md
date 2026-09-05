@@ -81,15 +81,15 @@ cp config/domain.example.env \
 ```env
 CONFIG_VERSION='4'
 
-DOMAIN='example.com'
-ACME_ACCOUNT='default'
+DOMAIN='example.com' # замените
+ACME_ACCOUNT='default' # замените
 ACME_ENV='production'
 
 DNS_PROVIDER=''
 
-SYNO_CERTIFICATE='Wildcard example.com'
-SYNO_USERNAME='acme-example'
-SYNO_PASSWORD='CHANGE_ME'
+SYNO_CERTIFICATE='Wildcard example.com' # замените
+SYNO_USERNAME='acme-example' # замените
+SYNO_PASSWORD='CHANGE_ME' # замените 
 SYNO_HOSTNAME='192.168.1.100'
 
 ENABLED='1'
@@ -158,7 +158,6 @@ REGRU_API_Password='PASSWORD'
 
 Другие DNS-провайдеры можно подключать через DNS hooks, поддерживаемые `acme.sh`, без изменения ядра проекта.
 
-> Реальные `.env`, DNS credentials, ACME data и private keys не публикуйте в Git.
 
 ## 🤖 Telegram
 
