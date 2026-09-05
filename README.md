@@ -6,12 +6,15 @@
 
 **DNS API • Manual DNS fallback • DSM deploy • Telegram control • Multi-domain**
 
-![Version](https://img.shields.io/badge/version-1.5.0-111827?style=for-the-badge)
-![Shell](https://img.shields.io/badge/POSIX-Shell-111827?style=for-the-badge&logo=gnu-bash&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-111827?style=for-the-badge&logo=docker&logoColor=white)
-![ACME](https://img.shields.io/badge/acme.sh-Let's_Encrypt-111827?style=for-the-badge&logo=letsencrypt&logoColor=white)
-![Synology](https://img.shields.io/badge/Synology-DSM-111827?style=for-the-badge)
-![Telegram](https://img.shields.io/badge/Telegram-Control-111827?style=for-the-badge&logo=telegram&logoColor=white)
+![Release](https://img.shields.io/badge/Release-v1.5.0-7C3AED?style=for-the-badge&logo=github&logoColor=white)
+![POSIX Shell](https://img.shields.io/badge/POSIX-Shell-F4B400?style=for-the-badge&logo=gnubash&logoColor=111827)
+![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+
+![Let's Encrypt](https://img.shields.io/badge/Let's%20Encrypt-ACME-003A70?style=for-the-badge&logo=letsencrypt&logoColor=white)
+![Synology DSM](https://img.shields.io/badge/Synology-DSM-B5B5B6?style=for-the-badge&logo=synology&logoColor=111827)
+![Telegram](https://img.shields.io/badge/Telegram-Control-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)
+
+**🟢 Automatic DNS API** &nbsp; **🟡 Manual TXT fallback** &nbsp; **🔵 DSM deploy** &nbsp; **🟣 Telegram**
 
 </div>
 
@@ -57,6 +60,24 @@ SynoCert Flow
           ├── renew
           └── notifications
 ```
+
+## 🌍 DNS-провайдеры
+
+SynoCert Flow использует DNS hooks из `acme.sh`, поэтому проект не привязан только к REG.RU и Spaceship.
+
+Для другого поддерживаемого провайдера достаточно создать профиль:
+
+```text
+config/dns-providers.d/<profile>.env
+```
+
+указать в нём нужный `DNS_API` и переменные credentials из соответствующего `acme.sh` hook, а в домене выбрать:
+
+```env
+DNS_PROVIDER='<profile>'
+```
+
+> Полный provider-specific `/test` в v1.5.0 реализован для REG.RU и Spaceship. Для остальных провайдеров выпуск/renewal может работать без изменения версии, но расширенная проверка credentials и доступа к зоне потребует отдельного test-adapter.
 
 ## 🚀 Быстрый старт
 
