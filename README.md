@@ -24,6 +24,12 @@
 
 Написан на **POSIX Shell**, работает поверх **acme.sh**, запускается через **Docker Compose** и не требует базы данных или отдельного backend.
 
+> 🚀 **Полностью автоматический цикл:** SynoCert Flow создаёт DNS challenge через API регистратора, проверяет появление TXT-записей в публичном DNS, выдерживает период стабилизации **600 секунд** (по умолчанию), завершает проверку Let's Encrypt и **сам устанавливает готовый сертификат в Synology DSM**. Ручной deploy не требуется.
+
+```text
+DNS API → TXT verification → 600s stabilization → Let's Encrypt → Synology DSM deploy
+```
+
 ## ✨ Возможности
 
 - 🔄 **Автопродление** — автоматический renewal через DNS API;
