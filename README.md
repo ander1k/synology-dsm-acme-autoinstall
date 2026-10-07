@@ -1,52 +1,73 @@
 <div align="center">
 
+<img src="docs/github-banner.png" alt="SynoCert Flow banner" width="100%">
+
 # 🔐 SynoCert Flow
 
-### Automated Let's Encrypt certificate management for Synology DSM
+### Премиальная автоматизация Let's Encrypt для Synology DSM
 
-**DNS API • Manual TXT fallback • DSM deploy • Telegram control**
+**DNS API · Manual TXT · Web Admin · DSM Deploy · Telegram Control**
 
-![Release](https://img.shields.io/badge/Release-v1.5.0-7C3AED?style=for-the-badge&logo=github&logoColor=white)
-![POSIX Shell](https://img.shields.io/badge/POSIX-Shell-F4B400?style=for-the-badge&logo=gnubash&logoColor=111827)
+![Release](https://img.shields.io/badge/release-v1.7.0-7C3AED?style=for-the-badge)
+![POSIX Shell](https://img.shields.io/badge/POSIX-Shell-111827?style=for-the-badge&logo=gnu-bash&logoColor=white)
+![Python](https://img.shields.io/badge/Python-Web_Admin-2563EB?style=for-the-badge&logo=python&logoColor=white)
 ![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-
-![Let's Encrypt](https://img.shields.io/badge/Let's%20Encrypt-ACME-003A70?style=for-the-badge&logo=letsencrypt&logoColor=white)
-![Synology DSM](https://img.shields.io/badge/Synology-DSM-B5B5B6?style=for-the-badge&logo=synology&logoColor=111827)
-![Telegram](https://img.shields.io/badge/Telegram-Control-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)
-
-**🟢 Automatic DNS API** &nbsp; **🟡 Manual TXT** &nbsp; **🔵 DSM deploy** &nbsp; **🟣 Telegram**
+![Synology](https://img.shields.io/badge/Synology-DSM-orange?style=for-the-badge)
 
 </div>
 
 ---
 
-**SynoCert Flow** — лёгкий Docker-проект для выпуска, продления и автоматической установки wildcard-сертификатов Let's Encrypt в **Synology DSM**.
+**SynoCert Flow** — это лёгкий self-hosted проект для выпуска, продления и автоматического деплоя wildcard-сертификатов **Let's Encrypt** в **Synology DSM**.
 
-Написан на **POSIX Shell**, работает поверх **acme.sh**, запускается через **Docker Compose** и не требует базы данных или отдельного backend.
+Проект построен на **acme.sh + POSIX Shell + Docker Compose**, а в версии **v1.7.0** дополнен полноценной **Web Admin** панелью с Dashboard, Add/Edit Domain, DNS Accounts, Backup / Restore и System Health.
 
-> 🚀 **Полностью автоматический цикл:** SynoCert Flow создаёт DNS challenge через API регистратора, проверяет появление TXT-записей в публичном DNS, выдерживает период стабилизации **600 секунд** (по умолчанию), завершает проверку Let's Encrypt и **сам устанавливает готовый сертификат в Synology DSM**. Ручной deploy не требуется.
+> 🚀 **Как это работает:** SynoCert Flow создаёт DNS challenge через API регистратора **или** ждёт ручной TXT, проверяет её появление, выдерживает окно стабилизации **600 секунд**, выпускает сертификат и **сам деплоит его в Synology DSM**.
 
 ```text
-DNS API → TXT verification → 600s stabilization → Let's Encrypt → Synology DSM deploy
+DNS API / Manual TXT → TXT verification → 600s stabilization → Let's Encrypt → Synology DSM deploy
 ```
 
-## ✨ Возможности
+## ✨ Что умеет
 
-- 🔄 **Автопродление** — автоматический renewal через DNS API;
-- 🌍 **DNS API** — REG.RU и Spaceship из коробки;
-- 📝 **Manual DNS-01** — ручной TXT workflow, если API не используется;
-- 🛟 **Fallback** — автоматический переход API → manual при реальной ошибке;
-- 🔐 **DSM Deploy** — установка готового сертификата прямо в Synology DSM;
-- 🧩 **Multi-domain** — несколько доменов, DSM-пользователей и ACME accounts;
-- 🧪 **Production / Staging** — безопасное тестирование через Let's Encrypt staging;
-- 🧠 **ARI-aware renewal** — учёт `Le_NextRenewTime` и рекомендованного окна продления;
-- 🤖 **Telegram Control** — команды, уведомления, диагностика и статусы;
-- ❤️ **Health & Logs** — healthcheck, журналы и резервные копии;
-- 🛡 **Rate-limit safety** — защита от случайных повторных `--force` выпусков.
+- 🔄 **Автопродление** сертификатов без ручных команд;
+- 🌍 **DNS API** для REG.RU и Spaceship из коробки;
+- 📝 **Manual DNS-01** для случаев без API;
+- 🔐 **DSM Deploy** — автоматическая установка сертификата в Synology DSM;
+- 🧩 **Multi-domain** — несколько доменов, несколько DSM-пользователей, несколько ACME accounts;
+- 🖥 **Web Admin** на `:8332` с Dashboard, Domain, Add/Edit Domain и Settings;
+- 🤖 **Telegram Control** — команды, уведомления и одноразовый вход в Web Admin;
+- 📜 **Activity timeline** и расширенный **System Health**;
+- 💾 **Backup / Restore** конфигурации из админки;
+- 🛡 **Безопасная очередь команд** — Web, Telegram и scheduler не конфликтуют между собой.
 
-## 🚀 Установка в Synology Container Manager
+## 🖥 Web Admin
 
-### 1. Распакуйте проект
+После запуска проекта панель доступна по адресу:
+
+```text
+http://NAS-IP:8332
+```
+
+Вход по умолчанию — через Telegram OTP:
+
+```text
+/web-login
+```
+
+В панели доступны:
+
+- **Dashboard** — все домены, статусы, сертификаты, queue, next action;
+- **Domain** — Test / Renew / Force Renew / Deploy / Debug, TXT challenge, readiness;
+- **Add Domain** — мастер добавления домена через DNS API или Manual TXT;
+- **Edit Domain** — изменение DSM, DNS account, ACME account, SAN и параметров deploy;
+- **Settings** — DNS accounts, Telegram, health, backups, restore.
+
+> Web Admin **не управляет Docker напрямую** и не требует `docker.sock`. Все действия отправляются в общую queue, а выполнять ACME/DNS/DSM операции может только один worker.
+
+## 🚀 Быстрый старт
+
+### 1) Распакуйте проект
 
 Например:
 
@@ -54,56 +75,27 @@ DNS API → TXT verification → 600s stabilization → Let's Encrypt → Synolo
 /volume1/docker/synocert-flow
 ```
 
-### 2. Создайте `.env`
+### 2) Создайте `.env`
 
 ```bash
 cp .env.example .env
 ```
 
-Укажите минимум:
+Минимум, что нужно заполнить:
 
 ```env
 TELEGRAM_BOT_TOKEN=''
 TELEGRAM_CHAT_ID=''
+WEB_PORT=8332
 ```
 
-Telegram можно оставить пустым, если он не нужен.
-
-### 3. Создайте конфиг домена
-
-```bash
-cp config/domain.example.env \
-   config/domains.d/example.com.env
-```
-
-Минимальный пример:
-
-```env
-CONFIG_VERSION='4'
-
-DOMAIN='example.com' # замените
-ACME_ACCOUNT='default' # замените
-ACME_ENV='production'
-
-DNS_PROVIDER=''
-
-SYNO_CERTIFICATE='Wildcard example.com' # замените
-SYNO_USERNAME='acme-example' # замените
-SYNO_PASSWORD='CHANGE_ME' # замените 
-SYNO_HOSTNAME='192.168.1.100'
-
-ENABLED='1'
-```
-
-### 4. Создайте Project в Container Manager
-
-Откройте:
+### 3) Создайте Project в Synology Container Manager
 
 ```text
 Container Manager → Проект → Создать
 ```
 
-Укажите:
+Параметры:
 
 ```text
 Имя проекта: synocert-flow
@@ -111,89 +103,130 @@ Container Manager → Проект → Создать
 Источник: compose.yaml
 ```
 
-Нажмите **Далее → Готово** и запустите проект.
-
-После старта должны появиться контейнеры:
+После запуска должны появиться сервисы:
 
 ```text
 acme-synology
 acme-telegram
+synocert-web
 ```
 
-### 5. Проверьте работу
-
-В Telegram:
+### 4) Откройте Web Admin
 
 ```text
-/version
-/health
-/status
-/test example.com
+http://NAS-IP:8332
 ```
 
-Без Telegram смотрите журнал контейнера `acme-synology`.
+### 5) Войдите через Telegram
 
-## 🌐 DNS API
-
-Для REG.RU:
-
-```env
-DNS_PROVIDER='regru-main'
-```
-
-Создайте:
+Отправьте боту:
 
 ```text
-config/dns-providers.d/regru-main.env
+/web-login
 ```
+
+Введите полученный одноразовый код в Web Admin.
+
+### 6) Добавьте первый домен
+
+Через **Add Domain** укажите:
+
+- домен;
+- DNS provider / manual mode;
+- DNS account или credentials;
+- DSM host / user / password;
+- имя сертификата в DSM.
+
+Дальше SynoCert Flow сам выполнит:
+
+```text
+Save config → Preflight Test → DNS / TXT verification → Issue / Renew → DSM Deploy
+```
+
+## 🌐 DNS providers
+
+Поддерживаются два основных сценария:
+
+### REG.RU
+
+В настройках или в `config/dns-providers.d/regru-main.env`:
 
 ```env
 DNS_API='dns_regru'
-
 REGRU_API_Username='LOGIN'
 REGRU_API_Password='PASSWORD'
 ```
 
-Для Spaceship используется тот же принцип с `dns_spaceship`.
+### Spaceship
 
-Другие DNS-провайдеры можно подключать через DNS hooks, поддерживаемые `acme.sh`, без изменения ядра проекта.
+В настройках или в `config/dns-providers.d/spaceship-main.env`:
 
+```env
+DNS_API='dns_spaceship'
+SPACESHIP_API_KEY='API_KEY'
+SPACESHIP_API_SECRET='API_SECRET'
+SPACESHIP_ROOT_DOMAIN=''
+```
 
-## 🤖 Telegram
+Если DNS API не указан, проект автоматически работает через **Manual TXT**.
+
+## 🤖 Telegram команды
 
 ```text
 /help
 /status
 /domains
-/cert <domain>
-/test <domain>
 /health
+/web-login
+/test <domain>
 /renew <domain>
 /renew-force <domain>
 /deploy <domain>
 /debug <domain>
 ```
 
-`/test <domain>` проверяет DSM, DNS API, доступ к домену, Let's Encrypt CA и готовность к автоматическому продлению — без изменения DNS и без выпуска сертификата.
+## 🛡 Безопасность
 
-Успешный итог:
+- Web / Telegram / scheduler используют **общую очередь команд**;
+- только **Certificate Worker** взаимодействует с `acme.sh`, DNS и DSM;
+- Web-сессии: **HttpOnly + SameSite=Strict + CSRF**;
+- поддержан **Telegram OTP login**;
+- секреты DNS / DSM **не отображаются обратно** в UI;
+- проект не требует доступа к `docker.sock`.
 
-```text
-Automatic renewal: ✅ READY
-```
-
-## 🛡 Renewal safety
-
-Обычный цикл не создаёт новый ACME order, пока сертификат не вошёл в окно продления.
-
-`SKIPPED / NOT DUE` считается нормальным состоянием и не запускает manual fallback.
-
-Принудительный выпуск:
+## 📁 Основная структура
 
 ```text
-/renew-force <domain>
+synocert-flow/
+├── app/                 # shell workers
+├── config/
+│   ├── domains.d/       # домены
+│   └── dns-providers.d/ # DNS accounts
+├── data/                # acme.sh storage
+├── state/               # queue, runtime state, OTP, health
+├── logs/
+├── backups/
+├── web/                 # Web Admin
+├── docs/
+│   └── github-banner.png
+├── compose.yaml
+└── .env
 ```
 
+## 📌 Важно
+
+- Не публикуйте реальные `.env`, DNS credentials, `data/`, private keys и backup-файлы в Git.
+- Для внешнего доступа к Web Admin используйте **VPN** или **HTTPS reverse proxy**.
+- При изменении DNS API / DSM настроек текущий сертификат остаётся валидным; новые параметры применяются при следующем test / renew / deploy.
+
+## 📄 Документация
+
+Дополнительные файлы в архиве:
+
+- `WEB-ADMIN.md` — подробности по Web Admin;
+- `CHANGELOG.md` — история изменений;
+- `DESIGN.md` / `REDESIGN-RU.md` — UI/UX описание;
+- `HOTFIX-1.6.1.md` — заметки по hotfix.
 
 ---
 
